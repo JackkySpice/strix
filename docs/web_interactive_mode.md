@@ -39,6 +39,57 @@ Branch: `cursor/check-mobile-responsiveness-and-terminal-interaction-1552`
 - Consider rate limiting / auth for the new message endpoint before exposing publicly.
 - Update external documentation / onboarding materials once the conversational mode is fully verified.
 
+## Step-by-Step Tutorial (Local Preview)
+1. **Prepare environment**
+   - Export your LLM credentials (example):
+     ```bash
+     export STRIX_LLM="perplexity/sonar-pro"
+     export LLM_API_KEY="pplx-XXXXXXX"
+     ```
+   - (Optional) create a virtualenv and install the project in editable mode:
+     ```bash
+     cd /workspace
+     pip3 install .
+     ```
+
+2. **Launch the web server**
+   ```bash
+   python3 -m uvicorn strix.interface.web:app --host 0.0.0.0 --port 8000
+   ```
+   Leave this running; logs will show `Uvicorn running on http://0.0.0.0:8000`.
+
+3. **Open the UI**
+   - In Cursor: Web Preview → “Open Port” → 8000 → open link.
+   - External SSH tunnel example:
+     ```bash
+     ssh -L 8000:127.0.0.1:8000 user@host
+     ```
+     then browse to `http://127.0.0.1:8000`.
+
+4. **Start a scan**
+   - In the composer, enter a target (e.g. `https://media.io`) and press send.
+   - The left sidebar will list the run; the chat feed will stream activity.
+
+5. **Respond when prompted**
+   - When the agent pauses for input you’ll see:
+     - Banner “Agent is waiting for your instructions…”
+     - Composer placeholder changes to “Agent is waiting for your instructions…”
+     - Chat feed shows a yellow prompt reminding you to reply.
+   - Type your guidance in the composer and press send; the backend posts to `/api/scans/{run_id}/messages` and the scan resumes.
+
+6. **Monitor progress**
+   - The composer automatically reverts to “Scan in progress…” while the agent works.
+   - Sidebar badges change from “waiting” → “running” → “completed/failed”.
+   - The chat feed will show your messages (role `You`) and agent responses.
+
+7. **Inspect results**
+   - Once completed, use the sidebar to revisit past runs.
+   - Download reports from `agent_runs/<run_id>/` on disk if needed.
+
+8. **Shut down**
+   - Stop the server with `Ctrl+C` (or `pkill -f "uvicorn strix.interface.web:app"`).
+   - Clear credentials from the terminal if required (`unset LLM_API_KEY`).
+
 ## Known Risks
 - If the agent crashes while waiting, UI may still show “waiting for input” until the next status refresh.
 - Large terminal outputs may make `/api/scans/{run_id}/events` heavy; consider pagination if this becomes an issue.
