@@ -244,14 +244,15 @@
                   >mic</span
                 >
               </button>
-              <button
-                id="send-button"
-                type="submit"
+                <button
+                  id="send-button"
+                  type="submit"
+                  aria-label="Start scan"
                   class="flex h-12 min-w-[3rem] cursor-pointer items-center justify-center rounded-lg bg-primary px-6 text-base font-semibold text-white transition hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background-dark focus:ring-primary sm:h-10 sm:w-10 sm:p-0 sm:px-0"
                 >
-                  <span class="material-symbols-outlined sm:hidden">arrow_upward</span>
-                  <span class="material-symbols-outlined hidden sm:inline">send</span>
-              </button>
+                  <span data-role="send-mobile-icon" class="material-symbols-outlined sm:hidden">arrow_upward</span>
+                  <span data-role="send-desktop-icon" class="material-symbols-outlined hidden sm:inline">send</span>
+                </button>
             </div>
           </form>
         </div>
@@ -259,23 +260,25 @@
     </div>
       <script>
         document.addEventListener("DOMContentLoaded", () => {
-          const elements = {
-            scanList: document.getElementById("scan-list"),
-            runHeader: document.getElementById("run-header"),
-            chatFeed: document.getElementById("chat-feed"),
-            chatScroll: document.getElementById("chat-scroll"),
-            composerForm: document.getElementById("composer-form"),
-            messageInput: document.getElementById("message-input"),
-            sendButton: document.getElementById("send-button"),
-            statusBanner: document.getElementById("status-banner"),
-            newScanLink: document.getElementById("new-chat-link"),
-            runSubtitle: document.getElementById("run-subtitle"),
-            sidebar: document.getElementById("sidebar"),
-            sidebarBackdrop: document.getElementById("sidebar-backdrop"),
-            openSidebar: document.getElementById("open-sidebar"),
-            closeSidebar: document.getElementById("close-sidebar"),
-            refreshScans: document.getElementById("refresh-scans"),
-          };
+            const elements = {
+              scanList: document.getElementById("scan-list"),
+              runHeader: document.getElementById("run-header"),
+              chatFeed: document.getElementById("chat-feed"),
+              chatScroll: document.getElementById("chat-scroll"),
+              composerForm: document.getElementById("composer-form"),
+              messageInput: document.getElementById("message-input"),
+              sendButton: document.getElementById("send-button"),
+              sendButtonMobileIcon: document.querySelector("[data-role='send-mobile-icon']"),
+              sendButtonDesktopIcon: document.querySelector("[data-role='send-desktop-icon']"),
+              statusBanner: document.getElementById("status-banner"),
+              newScanLink: document.getElementById("new-chat-link"),
+              runSubtitle: document.getElementById("run-subtitle"),
+              sidebar: document.getElementById("sidebar"),
+              sidebarBackdrop: document.getElementById("sidebar-backdrop"),
+              openSidebar: document.getElementById("open-sidebar"),
+              closeSidebar: document.getElementById("close-sidebar"),
+              refreshScans: document.getElementById("refresh-scans"),
+            };
 
           const state = {
             scans: new Map(),
@@ -292,20 +295,21 @@
             success: "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20",
           };
 
-          const statusBadges = {
-            starting: "bg-blue-500/20 text-blue-200",
-            running: "bg-blue-500/20 text-blue-200",
-            completed: "bg-emerald-500/20 text-emerald-200",
-            failed: "bg-red-500/20 text-red-200",
-          };
+            const statusBadges = {
+              starting: "bg-blue-500/20 text-blue-200",
+              running: "bg-blue-500/20 text-blue-200",
+              waiting: "bg-amber-500/20 text-amber-200",
+              completed: "bg-emerald-500/20 text-emerald-200",
+              failed: "bg-red-500/20 text-red-200",
+            };
 
-          const severityColors = {
-            critical: "from-red-600 to-red-500 text-white",
-            high: "from-orange-600 to-orange-500 text-white",
-            medium: "from-amber-600 to-amber-500 text-white",
-            low: "from-lime-600 to-lime-500 text-white",
-            info: "from-sky-600 to-sky-500 text-white",
-          };
+            const severityColors = {
+              critical: "from-red-600 to-red-500 text-white",
+              high: "from-orange-600 to-orange-500 text-white",
+              medium: "from-amber-600 to-amber-500 text-white",
+              low: "from-lime-600 to-lime-500 text-white",
+              info: "from-sky-600 to-sky-500 text-white",
+            };
 
           function setStatusMessage(message, variant = "info") {
             if (!elements.statusBanner) return;
@@ -379,7 +383,7 @@
               return;
             }
 
-            state.scans.forEach((scan, runId) => {
+              state.scans.forEach((scan, runId) => {
               const isActive = state.currentRunId === runId;
               const item = document.createElement("a");
               item.dataset.runId = runId;
@@ -390,12 +394,18 @@
                 item.classList.add("bg-primary/20", "text-primary");
               }
 
+                const statusLabel = scan.waiting_for_input ? "waiting" : scan.status;
               const icon = document.createElement("span");
               icon.className =
                 "material-symbols-outlined text-[#929bc9] group-hover:text-white transition";
               icon.style.fontSize = "24px";
-              icon.textContent =
-                scan.status === "running" || scan.status === "starting" ? "sync" : "history";
+                if (statusLabel === "waiting") {
+                  icon.textContent = "priority_high";
+                } else if (statusLabel === "running" || statusLabel === "starting") {
+                  icon.textContent = "sync";
+                } else {
+                  icon.textContent = "history";
+                }
               if (isActive) {
                 icon.classList.add("text-primary");
               }
@@ -413,7 +423,11 @@
 
               const sub = document.createElement("p");
               sub.className = "text-xs text-[#707aa5]";
-              sub.textContent = scan.status === "running" ? "Running…" : scan.status;
+                sub.textContent = scan.waiting_for_input
+                  ? "Needs your input"
+                  : statusLabel === "running"
+                    ? "Running…"
+                    : statusLabel;
 
               label.appendChild(title);
               label.appendChild(sub);
@@ -438,7 +452,8 @@
               return;
             }
 
-            const badgeClass = statusBadges[scan.status] || "bg-[#283149] text-white";
+              const statusLabel = scan.waiting_for_input ? "waiting" : scan.status;
+              const badgeClass = statusBadges[statusLabel] || "bg-[#283149] text-white";
             const targets = (scan.targets || [])
               .map((target) => `<code class="text-white">${target}</code>`)
               .join(", ");
@@ -453,7 +468,7 @@
                   <p class="text-xs text-[#707aa5]">Started ${new Date(scan.started_at).toLocaleString()}</p>
                 </div>
                 <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${badgeClass}">
-                  ${scan.status}
+                    ${statusLabel}
                 </span>
               </div>
               <div class="flex flex-col gap-1 text-sm text-[#929bc9]">
@@ -467,14 +482,19 @@
             `;
 
             if (elements.runSubtitle) {
-              const statusText =
-                scan.status === "running"
+                let statusText;
+                if (scan.waiting_for_input) {
+                  statusText = "Agent paused and waiting for your input.";
+                } else {
+                  statusText =
+                    scan.status === "running"
                   ? "Running scan – live updates below."
                   : scan.status === "completed"
                     ? "Scan complete – review the summary and findings."
                     : scan.status === "failed"
                       ? `Scan failed – ${scan.error || "check the details below."}`
                       : `Status: ${scan.status}`;
+                }
               elements.runSubtitle.textContent = statusText;
             }
           }
@@ -702,16 +722,22 @@
               return;
             }
 
-            if (!events || events.length === 0) {
+              if (!events || events.length === 0) {
               const placeholder = document.createElement("div");
               placeholder.className =
                 "rounded-lg border border-dashed border-white/10 p-6 text-center text-sm text-[#929bc9]";
-              placeholder.innerHTML = `
-                <p class="font-medium text-white">Scan running…</p>
-                <p class="mt-2 leading-relaxed">
-                  Strix is preparing the environment. This can take a minute on first run while Docker pulls the agent image.
-                </p>
-              `;
+                const placeholderTitle = scan.waiting_for_input
+                  ? "Agent awaiting your guidance…"
+                  : "Scan running…";
+                const placeholderBody = scan.waiting_for_input
+                  ? "Reply below so the agent can continue."
+                  : "Strix is preparing the environment. This can take a minute on first run while Docker pulls the agent image.";
+                placeholder.innerHTML = `
+                  <p class="font-medium text-white">${placeholderTitle}</p>
+                  <p class="mt-2 leading-relaxed">
+                    ${placeholderBody}
+                  </p>
+                `;
               container.appendChild(placeholder);
             } else {
               events.forEach((event) => {
@@ -731,6 +757,15 @@
               });
             }
 
+              if (scan.waiting_for_input) {
+                const waitingPrompt = document.createElement("div");
+                waitingPrompt.className =
+                  "rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100";
+                waitingPrompt.innerHTML =
+                  '<div class="flex items-center gap-2"><span class="material-symbols-outlined text-base">priority_high</span><span>The agent is waiting for your guidance. Reply below to continue the scan.</span></div>';
+                container.appendChild(waitingPrompt);
+              }
+
             if (elements.chatScroll) {
               requestAnimationFrame(() => {
                 elements.chatScroll.scrollTop = elements.chatScroll.scrollHeight;
@@ -749,6 +784,11 @@
               state.scans.clear();
               scans.forEach((scan) => state.scans.set(scan.run_id, scan));
               renderScanList();
+                if (state.currentRunId && !state.scans.has(state.currentRunId)) {
+                  state.currentRunId = null;
+                  renderRunHeader(null);
+                  renderChat(null, null);
+                }
             } catch (error) {
               console.error("Failed to load scans", error);
               setStatusMessage(error.message || "Failed to load scans", "error");
@@ -774,7 +814,9 @@
               renderChat(events, scan);
               updateComposerState(scan);
 
-              if (scan.status === "completed") {
+                if (scan.waiting_for_input) {
+                  setStatusMessage("Agent is waiting for your instructions. Reply below to continue.", "warning");
+                } else if (scan.status === "completed") {
                 setStatusMessage("Scan completed. Open the summary for details.", "success");
               } else if (scan.status === "failed") {
                 setStatusMessage(
@@ -793,23 +835,45 @@
           }
 
           function updateComposerState(scan) {
-            const disabled = scan && (scan.status === "running" || scan.status === "starting");
-            elements.messageInput.disabled = disabled;
-            elements.sendButton.disabled = disabled;
-            elements.messageInput.placeholder = disabled
-              ? "Scan in progress… Sit tight!"
-              : "Enter a target URL or domain (e.g. https://media.io)";
+              const waiting = Boolean(scan && scan.waiting_for_input);
+              const busy = Boolean(
+                scan && !waiting && (scan.status === "running" || scan.status === "starting"),
+              );
+              const placeholderBase = "Enter a target URL or domain (e.g. https://media.io)";
+              const placeholder = waiting
+                ? "Agent is waiting for your instructions…"
+                : busy
+                  ? "Scan in progress… Sit tight!"
+                  : placeholderBase;
 
-            if (elements.sendButton) {
-              elements.sendButton.classList.toggle("opacity-60", disabled);
-              elements.sendButton.classList.toggle("cursor-not-allowed", disabled);
-            }
+              elements.messageInput.disabled = busy;
+              elements.sendButton.disabled = busy;
+              elements.messageInput.placeholder = placeholder;
 
-            if (elements.refreshScans) {
-              elements.refreshScans.disabled = disabled;
-              elements.refreshScans.classList.toggle("opacity-60", disabled);
-              elements.refreshScans.classList.toggle("cursor-not-allowed", disabled);
-            }
+              if (elements.sendButton) {
+                elements.sendButton.classList.toggle("opacity-60", busy);
+                elements.sendButton.classList.toggle("cursor-not-allowed", busy);
+                elements.sendButton.setAttribute(
+                  "aria-label",
+                  waiting ? "Send reply to agent" : "Start scan",
+                );
+              }
+
+              if (elements.sendButtonMobileIcon) {
+                elements.sendButtonMobileIcon.textContent = waiting ? "forum" : "arrow_upward";
+              }
+
+              if (elements.sendButtonDesktopIcon) {
+                elements.sendButtonDesktopIcon.textContent = waiting ? "reply" : "send";
+              }
+
+              elements.composerForm.dataset.mode = waiting ? "reply" : "launch";
+
+              if (elements.refreshScans) {
+                elements.refreshScans.disabled = busy;
+                elements.refreshScans.classList.toggle("opacity-60", busy);
+                elements.refreshScans.classList.toggle("cursor-not-allowed", busy);
+              }
           }
 
           function stopPolling() {
@@ -840,9 +904,15 @@
             const active = state.currentRunId
               ? state.scans.get(state.currentRunId)
               : null;
-            if (active && (active.status === "running" || active.status === "starting")) {
-              setStatusMessage("Hold up—current scan still running. Wait for it to finish.", "warning");
-              return;
+              if (active) {
+                if (active.waiting_for_input) {
+                  await sendReplyMessage(active.run_id, value);
+                  return;
+                }
+                if (active.status === "running" || active.status === "starting") {
+                  setStatusMessage("Hold up—current scan still running. Wait for it to finish.", "warning");
+                  return;
+                }
             }
 
             elements.sendButton.disabled = true;
@@ -881,6 +951,37 @@
             }
           }
 
+            async function sendReplyMessage(runId, message) {
+              elements.sendButton.disabled = true;
+              elements.messageInput.disabled = true;
+              try {
+                setStatusMessage("Sending your instructions to the agent…", "info");
+                const response = await fetchJson(`/api/scans/${runId}/messages`, {
+                  method: "POST",
+                  body: JSON.stringify({ content: message }),
+                });
+
+                state.scans.set(response.run_id, response);
+                elements.messageInput.value = "";
+
+                await loadScan(response.run_id);
+              } catch (error) {
+                console.error("Failed to send message", error);
+                setStatusMessage(error.message || "Failed to send message", "error");
+              } finally {
+                const refreshed =
+                  state.currentRunId && state.scans.has(state.currentRunId)
+                    ? state.scans.get(state.currentRunId)
+                    : null;
+                elements.messageInput.disabled = false;
+                elements.sendButton.disabled = false;
+                updateComposerState(refreshed || null);
+                if (refreshed && (refreshed.status === "running" || refreshed.status === "starting" || refreshed.waiting_for_input)) {
+                  startPolling(refreshed.run_id);
+                }
+              }
+            }
+
           function selectScan(runId) {
             if (state.currentRunId === runId) return;
             state.currentRunId = runId;
@@ -890,7 +991,10 @@
             renderRunHeader(scan);
             renderChat(state.events.get(runId) || [], scan);
             updateComposerState(scan);
-            if (scan && (scan.status === "running" || scan.status === "starting")) {
+            if (
+              scan &&
+              (scan.status === "running" || scan.status === "starting" || scan.waiting_for_input)
+            ) {
               startPolling(runId);
             }
             if (window.innerWidth < 1024) {

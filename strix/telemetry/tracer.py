@@ -36,6 +36,8 @@ class Tracer:
 
         self.vulnerability_reports: list[dict[str, Any]] = []
         self.final_scan_result: str | None = None
+        self.root_agent_id: str | None = None
+        self.agent_waiting_since: dict[str, str] = {}
 
         self.scan_results: dict[str, Any] | None = None
         self.scan_config: dict[str, Any] | None = None
@@ -124,6 +126,8 @@ class Tracer:
         }
 
         self.agents[agent_id] = agent_data
+        if parent_id is None and self.root_agent_id is None:
+            self.root_agent_id = agent_id
 
     def log_chat_message(
         self,
@@ -187,6 +191,13 @@ class Tracer:
             self.agents[agent_id]["updated_at"] = datetime.now(UTC).isoformat()
             if error_message:
                 self.agents[agent_id]["error_message"] = error_message
+            if status == "waiting":
+                waiting_since = datetime.now(UTC).isoformat()
+                self.agents[agent_id]["waiting_since"] = waiting_since
+                self.agent_waiting_since[agent_id] = waiting_since
+            else:
+                self.agents[agent_id].pop("waiting_since", None)
+                self.agent_waiting_since.pop(agent_id, None)
 
     def set_scan_config(self, config: dict[str, Any]) -> None:
         self.scan_config = config
