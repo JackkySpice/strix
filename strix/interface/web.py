@@ -30,6 +30,7 @@ from strix.interface.main import (
 from strix.interface.utils import assign_workspace_subdirs, generate_run_name, infer_target_type
 from strix.llm.config import LLMConfig
 from strix.telemetry.tracer import Tracer, set_global_tracer
+from strix.tools.agents_graph.agents_graph_actions import send_user_message_to_agent
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +55,17 @@ class ScanCreateRequest(BaseModel):
             raise ValueError("At least one target must be provided.")
         values["targets"] = targets
         return values
+class ScanMessageRequest(BaseModel):
+    content: str = Field(..., min_length=1, max_length=2_000)
+
+    @root_validator(pre=True)
+    def ensure_content(cls, values: dict[str, Any]) -> dict[str, Any]:
+        content = (values.get("content") or "").strip()
+        if not content:
+            raise ValueError("Message content cannot be empty.")
+        values["content"] = content
+        return values
+
 
 
 @dataclass
@@ -85,6 +97,7 @@ class ScanManager:
         self._initialized = False
         self._init_error: str | None = None
         self._active_run_id: str | None = None
+        self._message_locks: dict[str, asyncio.Lock] = {}
 
     async def ensure_ready(self) -> None:
         if self._initialized:
@@ -200,6 +213,38 @@ class ScanManager:
         assign_workspace_subdirs(targets_info)
         return targets_info
 
+    async def send_message(self, run_id: str, content: str) -> ScanRecord:
+        record = self.get_scan(run_id)
+        tracer = record.tracer
+        root_agent_id = tracer.root_agent_id
+
+        if not root_agent_id:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                "Agent is not ready to receive messages yet.",
+            )
+
+        lock = self._message_locks.setdefault(run_id, asyncio.Lock())
+        async with lock:
+            agent_info = tracer.agents.get(root_agent_id)
+            agent_status = agent_info.get("status") if agent_info else None
+
+            if agent_status != "waiting":
+                raise HTTPException(
+                    status.HTTP_409_CONFLICT,
+                    "Agent is currently processing and not awaiting input.",
+                )
+
+            tracer.log_chat_message(content, "user", agent_id=root_agent_id)
+
+            result = send_user_message_to_agent(root_agent_id, content)
+            if not result.get("success", True):
+                error_message = result.get("error") or "Failed to deliver message to agent."
+                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, error_message)
+            tracer.update_agent_status(root_agent_id, "running")
+
+        return record
+
     def _log_background_error(self, task: asyncio.Task[Any]) -> None:
         if task.cancelled():
             return
@@ -240,6 +285,7 @@ class ScanManager:
         async with self._lock:
             if self._active_run_id == run_id:
                 self._active_run_id = None
+            self._message_locks.pop(run_id, None)
 
     def list_scans(self) -> list[ScanRecord]:
         return sorted(self._scans.values(), key=lambda record: record.started_at, reverse=True)
@@ -265,6 +311,17 @@ scan_manager = ScanManager()
 
 def _serialize_scan(record: ScanRecord) -> dict[str, Any]:
     tracer = record.tracer
+    waiting_for_input = False
+    waiting_since: str | None = None
+    root_agent_status: str | None = None
+    root_agent_id = tracer.root_agent_id
+    if root_agent_id:
+        agent_info = tracer.agents.get(root_agent_id, {})
+        root_agent_status = agent_info.get("status")
+        waiting_for_input = root_agent_status == "waiting"
+        waiting_since = (
+            agent_info.get("waiting_since") or tracer.agent_waiting_since.get(root_agent_id)
+        )
     return {
         "run_id": record.run_id,
         "targets": record.original_targets,
@@ -275,6 +332,10 @@ def _serialize_scan(record: ScanRecord) -> dict[str, Any]:
         "vulnerability_count": len(tracer.vulnerability_reports),
         "has_report": bool(tracer.final_scan_result),
         "error": record.error,
+        "waiting_for_input": waiting_for_input,
+        "waiting_since": waiting_since,
+        "root_agent_id": root_agent_id,
+        "root_agent_status": root_agent_status,
     }
 
 
@@ -303,6 +364,30 @@ def _serialize_events(record: ScanRecord) -> list[dict[str, Any]]:
                 "role": message.get("role", "assistant"),
                 "content": message.get("content", ""),
                 "timestamp": message.get("timestamp"),
+            }
+        )
+
+    for execution_id, execution in tracer.tool_executions.items():
+        if execution.get("tool_name") != "terminal_execute":
+            continue
+
+        args = execution.get("args") or {}
+        result = execution.get("result") or {}
+        timestamp = execution.get("completed_at") or execution.get("timestamp")
+
+        events.append(
+            {
+                "id": f"terminal-{execution_id}",
+                "type": "terminal",
+                "command": args.get("command") or "",
+                "is_input": bool(args.get("is_input")),
+                "status": execution.get("status", "unknown"),
+                "exit_code": result.get("exit_code"),
+                "output": result.get("content") or "",
+                "error": result.get("error"),
+                "terminal_id": args.get("terminal_id") or result.get("terminal_id") or "default",
+                "working_dir": result.get("working_dir"),
+                "timestamp": timestamp,
             }
         )
 
@@ -359,6 +444,12 @@ async def create_scan(payload: ScanCreateRequest) -> dict[str, Any]:
     ) as exc:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(exc)) from exc
 
+    return _serialize_scan(record)
+
+
+@app.post("/api/scans/{run_id}/messages")
+async def post_scan_message(run_id: str, payload: ScanMessageRequest) -> dict[str, Any]:
+    record = await scan_manager.send_message(run_id, payload.content)
     return _serialize_scan(record)
 
 
