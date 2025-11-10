@@ -45,82 +45,131 @@
       }
     </style>
   </head>
-  <body class="bg-background-light dark:bg-background-dark font-display">
-    <div class="relative flex h-screen w-full flex-row overflow-hidden">
+    <body class="bg-background-light dark:bg-background-dark font-display">
+      <div class="relative flex min-h-screen w-full flex-col overflow-hidden lg:flex-row">
       <!-- SideNavBar -->
-      <aside
-        class="flex h-full w-full max-w-[280px] flex-col border-r border-white/10 bg-[#111422] p-4"
-      >
-        <div class="flex h-full flex-col justify-between">
+        <aside
+          id="sidebar"
+          class="fixed inset-y-0 left-0 z-40 flex w-full max-w-xs -translate-x-full transform flex-col bg-[#111422]/95 p-4 pt-6 backdrop-blur-lg transition-transform duration-300 ease-in-out lg:relative lg:z-auto lg:h-full lg:max-w-[280px] lg:translate-x-0 lg:border-r lg:border-white/10 lg:bg-[#111422]"
+        >
           <div class="flex flex-col gap-6">
-            <div class="flex items-center gap-3 px-2">
-              <div class="relative">
-                <div
-                  class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-                  data-alt="Aura AI logo with a purple and blue gradient"
-                  style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDewCTNUMxp_robE_EnmYLFqdMXlEh8xchUk7AN37g9At7ajqzAym6f6I5hqbiJIAQk0xt2DaXx_xLrCa2SsR4aYEKADm1uKwD3OJ1h4zIlki_uN4sP75e7sr90nV9-Y_jtURU6apBQbW8FHDPyQuvHV3W2vN8_kRGoRJnnQC9uJttNR57GZf0JCWdczJZiv6bBFHOzGVmSoTxLUb40Wm2cmoewrwRtNvlDXX53QYDbDQfho-H6kEsCUX7zHleYYXMxD79RIMD4ms4A");'
-                ></div>
-                <span
-                  class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-400 ring-2 ring-[#111422]"
-                ></span>
+            <div class="flex items-start justify-between gap-3 px-2">
+              <div class="flex items-center gap-3">
+                <div class="relative">
+                  <div
+                    class="size-10 rounded-full bg-cover bg-center bg-no-repeat"
+                    data-alt="Aura AI logo with a purple and blue gradient"
+                    style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDewCTNUMxp_robE_EnmYLFqdMXlEh8xchUk7AN37g9At7ajqzAym6f6I5hqbiJIAQk0xt2DaXx_xLrCa2SsR4aYEKADm1uKwD3OJ1h4zIlki_uN4sP75e7sr90nV9-Y_jtURU6apBQbW8FHDPyQuvHV3W2vN8_kRGoRJnnQC9uJttNR57GZf0JCWdczJZiv6bBFHOzGVmSoTxLUb40Wm2cmoewrwRtNvlDXX53QYDbDQfho-H6kEsCUX7zHleYYXMxD79RIMD4ms4A");'
+                  ></div>
+                  <span
+                    class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-400 ring-2 ring-[#111422]"
+                  ></span>
+                </div>
+                <div class="flex flex-col">
+                  <h1 class="text-base font-semibold leading-tight text-white">
+                    Strix Aura
+                  </h1>
+                  <p class="text-xs font-medium uppercase tracking-wide text-[#929bc9]">
+                    Live session
+                  </p>
+                </div>
               </div>
-              <div class="flex flex-col">
-                <h1 class="text-white text-base font-medium leading-normal">
-                  Strix Aura
-                </h1>
-                <p class="text-[#929bc9] text-sm font-normal leading-normal">
-                  Online
-                </p>
-              </div>
-            </div>
-            <nav id="scan-list" class="flex flex-col gap-2">
-              <div
-                class="flex flex-col gap-2 rounded-lg border border-dashed border-white/10 p-3 text-[#929bc9] text-sm"
+              <button
+                id="close-sidebar"
+                class="flex items-center gap-1 rounded-lg border border-white/10 px-3 py-2 text-xs font-medium text-white/80 transition hover:bg-white/10 lg:hidden"
+                type="button"
               >
-                <p class="font-medium text-white">No scans yet</p>
-                <p class="leading-normal text-xs text-[#707aa5]">
-                  Start by entering a target URL or domain below. Your recent
-                  scans will appear here.
+                <span class="material-symbols-outlined" style="font-size: 18px">close</span>
+                Close
+              </button>
+            </div>
+            <div class="flex flex-col gap-6 overflow-y-auto pb-4">
+              <div class="rounded-lg border border-white/5 bg-white/5 p-4">
+                <p class="text-sm font-semibold text-white">Recent Scans</p>
+                <p class="mt-1 text-xs text-[#707aa5]">
+                  Track progress, reopen results, and resume open scans.
                 </p>
               </div>
-            </nav>
+              <nav id="scan-list" class="flex flex-col gap-2">
+                <div
+                  class="flex flex-col gap-2 rounded-lg border border-dashed border-white/10 p-3 text-sm text-[#929bc9]"
+                >
+                  <p class="font-medium text-white">No scans yet</p>
+                  <p class="text-xs leading-normal text-[#707aa5]">
+                    Start by entering a target URL or domain below. Your recent scans will appear
+                    here.
+                  </p>
+                </div>
+              </nav>
+            </div>
           </div>
-          <div class="flex flex-col gap-1 border-t border-white/10 pt-4">
+          <div class="mt-auto flex flex-col gap-1 border-t border-white/10 pt-4">
             <a
               id="new-chat-link"
-              class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 group cursor-pointer"
+              class="group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition hover:bg-white/10"
             >
               <span
-                class="material-symbols-outlined text-[#929bc9] group-hover:text-white"
+                class="material-symbols-outlined text-[#929bc9] transition group-hover:text-white"
                 style="font-size: 24px"
                 >add_comment</span
               >
-              <p class="text-white text-sm font-medium leading-normal">
-                New Scan
-              </p>
+              <p class="text-sm font-medium leading-normal text-white">New Scan</p>
             </a>
             <a
               id="settings-link"
-              class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 group pointer-events-none opacity-60"
+              class="group flex items-center gap-3 rounded-lg px-3 py-2 opacity-60 transition hover:bg-white/10 pointer-events-none"
             >
-              <span
-                class="material-symbols-outlined text-[#929bc9]"
-                style="font-size: 24px"
+              <span class="material-symbols-outlined text-[#929bc9]" style="font-size: 24px"
                 >settings</span
               >
-              <p class="text-white text-sm font-medium leading-normal">
-                Settings
-              </p>
+              <p class="text-sm font-medium leading-normal text-white">Settings</p>
             </a>
           </div>
-        </div>
-      </aside>
-      <!-- Main Chat Panel -->
-      <main class="flex flex-1 flex-col h-screen bg-background-dark">
+        </aside>
         <div
-          id="chat-scroll"
-          class="flex flex-1 flex-col overflow-y-auto px-4 pt-6 pb-4 md:px-6 lg:px-8"
-        >
+          id="sidebar-backdrop"
+          class="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"
+        ></div>
+        <!-- Main Area -->
+        <main class="relative flex flex-1 flex-col bg-background-dark">
+          <header
+            class="sticky top-0 z-10 flex flex-col gap-4 border-b border-white/5 bg-background-dark/80 px-4 py-4 backdrop-blur-sm md:flex-row md:items-center md:justify-between md:gap-6 md:px-6 lg:px-8"
+          >
+            <div class="flex items-center gap-3">
+              <button
+                id="open-sidebar"
+                class="flex size-10 items-center justify-center rounded-lg border border-white/10 text-white transition hover:bg-white/10 lg:hidden"
+                type="button"
+              >
+                <span class="material-symbols-outlined">menu</span>
+              </button>
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-primary">
+                  Aura Console
+                </p>
+                <h2 class="text-lg font-semibold text-white md:text-xl">
+                  Strix Autonomous Security Scans
+                </h2>
+                <p id="run-subtitle" class="text-sm text-[#929bc9]">
+                  Launch a scan to see live progress updates.
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <button
+                id="refresh-scans"
+                class="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10"
+                type="button"
+              >
+                <span class="material-symbols-outlined text-base">refresh</span>
+                Refresh
+              </button>
+            </div>
+          </header>
+          <section
+            id="chat-scroll"
+            class="flex flex-1 flex-col overflow-y-auto px-4 pb-20 pt-6 md:px-6 lg:px-8 lg:pb-6"
+          >
           <div
             id="status-banner"
             class="hidden mb-4 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white"
@@ -137,7 +186,7 @@
               session and results save under <code>agent_runs/</code>.
             </p>
           </div>
-          <div id="chat-feed" class="flex-1 space-y-6 py-4">
+            <div id="chat-feed" class="flex-1 space-y-6 py-4">
             <div
               class="rounded-lg border border-dashed border-white/10 p-6 text-center text-sm text-[#929bc9]"
             >
@@ -150,11 +199,11 @@
               </p>
             </div>
           </div>
-        </div>
-        <!-- Composer / Message Input Bar -->
-        <div
-          class="flex items-center px-4 py-3 gap-3 border-t border-white/10 bg-background-dark/80 backdrop-blur-sm sm:px-6 lg:px-8"
-        >
+          </section>
+          <!-- Composer / Message Input Bar -->
+          <div
+            class="sticky bottom-0 flex items-center gap-3 border-t border-white/10 bg-background-dark/90 px-4 py-3 backdrop-blur-md sm:px-6 lg:px-8"
+          >
           <div
             class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 shrink-0"
             data-alt="User avatar with a simple abstract pattern"
@@ -162,15 +211,15 @@
           ></div>
           <form
             id="composer-form"
-            class="flex w-full items-stretch rounded-lg h-12"
+              class="flex w-full flex-col items-stretch gap-3 rounded-lg sm:flex-row sm:items-center sm:gap-2"
           >
             <input
               id="message-input"
-              class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary border-none bg-[#283149] focus:border-none h-full placeholder:text-[#929bc9] px-4 text-base font-normal"
+                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border-none bg-[#283149] px-4 py-3 text-base font-normal text-white placeholder:text-[#929bc9] focus:outline-0 focus:ring-2 focus:ring-primary"
               placeholder="Enter a target URL or domain (e.g. https://media.io)"
               autocomplete="off"
             />
-            <div class="flex items-center justify-center pl-2">
+              <div class="flex items-center justify-end gap-1 sm:justify-center sm:pl-2">
               <button
                 type="button"
                 class="flex items-center justify-center p-2 rounded-full hover:bg-white/10 cursor-not-allowed opacity-30"
@@ -198,541 +247,709 @@
               <button
                 id="send-button"
                 type="submit"
-                class="flex cursor-pointer items-center justify-center rounded-lg h-10 w-10 ml-2 bg-primary text-white transition hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background-dark focus:ring-primary"
-              >
-                <span class="material-symbols-outlined">send</span>
+                  class="flex h-12 min-w-[3rem] cursor-pointer items-center justify-center rounded-lg bg-primary px-6 text-base font-semibold text-white transition hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background-dark focus:ring-primary sm:h-10 sm:w-10 sm:p-0 sm:px-0"
+                >
+                  <span class="material-symbols-outlined sm:hidden">arrow_upward</span>
+                  <span class="material-symbols-outlined hidden sm:inline">send</span>
               </button>
             </div>
           </form>
         </div>
       </main>
     </div>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const elements = {
-          scanList: document.getElementById("scan-list"),
-          runHeader: document.getElementById("run-header"),
-          chatFeed: document.getElementById("chat-feed"),
-          chatScroll: document.getElementById("chat-scroll"),
-          composerForm: document.getElementById("composer-form"),
-          messageInput: document.getElementById("message-input"),
-          sendButton: document.getElementById("send-button"),
-          statusBanner: document.getElementById("status-banner"),
-          newScanLink: document.getElementById("new-chat-link"),
-        };
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          const elements = {
+            scanList: document.getElementById("scan-list"),
+            runHeader: document.getElementById("run-header"),
+            chatFeed: document.getElementById("chat-feed"),
+            chatScroll: document.getElementById("chat-scroll"),
+            composerForm: document.getElementById("composer-form"),
+            messageInput: document.getElementById("message-input"),
+            sendButton: document.getElementById("send-button"),
+            statusBanner: document.getElementById("status-banner"),
+            newScanLink: document.getElementById("new-chat-link"),
+            runSubtitle: document.getElementById("run-subtitle"),
+            sidebar: document.getElementById("sidebar"),
+            sidebarBackdrop: document.getElementById("sidebar-backdrop"),
+            openSidebar: document.getElementById("open-sidebar"),
+            closeSidebar: document.getElementById("close-sidebar"),
+            refreshScans: document.getElementById("refresh-scans"),
+          };
 
-        const state = {
-          scans: new Map(),
-          events: new Map(),
-          currentRunId: null,
-          pollingHandle: null,
-          pollInterval: 4000,
-        };
+          const state = {
+            scans: new Map(),
+            events: new Map(),
+            currentRunId: null,
+            pollingHandle: null,
+            pollInterval: 4000,
+          };
 
-        const statusStyles = {
-          info: "bg-primary/10 text-primary border border-primary/30",
-          warning: "bg-yellow-500/10 text-yellow-300 border border-yellow-500/20",
-          error: "bg-red-500/10 text-red-300 border border-red-500/20",
-          success: "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20",
-        };
+          const statusStyles = {
+            info: "bg-primary/10 text-primary border border-primary/30",
+            warning: "bg-yellow-500/10 text-yellow-300 border border-yellow-500/20",
+            error: "bg-red-500/10 text-red-300 border border-red-500/20",
+            success: "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20",
+          };
 
-        const statusBadges = {
-          starting: "bg-blue-500/20 text-blue-200",
-          running: "bg-blue-500/20 text-blue-200",
-          completed: "bg-emerald-500/20 text-emerald-200",
-          failed: "bg-red-500/20 text-red-200",
-        };
+          const statusBadges = {
+            starting: "bg-blue-500/20 text-blue-200",
+            running: "bg-blue-500/20 text-blue-200",
+            completed: "bg-emerald-500/20 text-emerald-200",
+            failed: "bg-red-500/20 text-red-200",
+          };
 
-        const severityColors = {
-          critical: "from-red-600 to-red-500 text-white",
-          high: "from-orange-600 to-orange-500 text-white",
-          medium: "from-amber-600 to-amber-500 text-white",
-          low: "from-lime-600 to-lime-500 text-white",
-          info: "from-sky-600 to-sky-500 text-white",
-        };
+          const severityColors = {
+            critical: "from-red-600 to-red-500 text-white",
+            high: "from-orange-600 to-orange-500 text-white",
+            medium: "from-amber-600 to-amber-500 text-white",
+            low: "from-lime-600 to-lime-500 text-white",
+            info: "from-sky-600 to-sky-500 text-white",
+          };
 
-        function setStatusMessage(message, variant = "info") {
-          if (!elements.statusBanner) return;
-          if (!message) {
-            elements.statusBanner.classList.add("hidden");
-            elements.statusBanner.textContent = "";
-            return;
-          }
-          elements.statusBanner.className =
-            "mb-4 rounded-lg px-4 py-3 text-sm " +
-            (statusStyles[variant] || statusStyles.info);
-          elements.statusBanner.textContent = message;
-        }
-
-        async function fetchJson(url, options = {}) {
-          const response = await fetch(url, {
-            headers: { "Content-Type": "application/json", Accept: "application/json" },
-            ...options,
-          });
-
-          const text = await response.text();
-          const data = text ? JSON.parse(text) : null;
-          if (!response.ok) {
-            const message =
-              data && data.detail
-                ? data.detail
-                : `Request failed (${response.status})`;
-            const error = new Error(message);
-            error.status = response.status;
-            error.payload = data;
-            throw error;
-          }
-          return data;
-        }
-
-        function renderScanList() {
-          const container = elements.scanList;
-          container.innerHTML = "";
-
-          if (state.scans.size === 0) {
-            container.innerHTML = `
-              <div class="flex flex-col gap-2 rounded-lg border border-dashed border-white/10 p-3 text-[#929bc9] text-sm">
-                <p class="font-medium text-white">No scans yet</p>
-                <p class="leading-normal text-xs text-[#707aa5]">
-                  Start by entering a target URL or domain below. Your recent scans will appear here.
-                </p>
-              </div>
-            `;
-            return;
-          }
-
-          state.scans.forEach((scan, runId) => {
-            const isActive = state.currentRunId === runId;
-            const item = document.createElement("a");
-            item.dataset.runId = runId;
-            item.className =
-              "flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 group cursor-pointer transition";
-
-            if (isActive) {
-              item.classList.add("bg-primary/20", "text-primary");
-            }
-
-            const icon = document.createElement("span");
-            icon.className =
-              "material-symbols-outlined text-[#929bc9] group-hover:text-white transition";
-            icon.style.fontSize = "24px";
-            icon.textContent =
-              scan.status === "running" || scan.status === "starting" ? "sync" : "history";
-            if (isActive) {
-              icon.classList.add("text-primary");
-            }
-            item.appendChild(icon);
-
-            const label = document.createElement("div");
-            label.className = "flex flex-col";
-            const title = document.createElement("p");
-            title.className =
-              "text-sm font-medium leading-normal " +
-              (isActive ? "text-white" : "text-[#929bc9] group-hover:text-white");
-
-            const firstTarget = (scan.targets && scan.targets[0]) || scan.run_id;
-            title.textContent = firstTarget.length > 32 ? firstTarget.slice(0, 32) + "…" : firstTarget;
-
-            const sub = document.createElement("p");
-            sub.className = "text-xs text-[#707aa5]";
-            sub.textContent = scan.status === "running" ? "Running…" : scan.status;
-
-            label.appendChild(title);
-            label.appendChild(sub);
-
-            item.appendChild(label);
-            item.addEventListener("click", () => selectScan(runId));
-
-            container.appendChild(item);
-          });
-        }
-
-        function renderRunHeader(scan) {
-          const header = elements.runHeader;
-          if (!scan) {
-            header.innerHTML = `
-              <p class="text-sm text-white font-semibold">Start a new Strix scan</p>
-              <p>Enter a target (URL or domain). Scans run in your Cloud Shell session and results save under <code>agent_runs/</code>.</p>
-            `;
-            return;
-          }
-
-          const badgeClass = statusBadges[scan.status] || "bg-[#283149] text-white";
-          const targets = (scan.targets || []).map((target) => `<code class="text-white">${target}</code>`).join(", ");
-          const instruction = scan.instruction
-            ? `<p class="text-xs text-[#707aa5] truncate">Instruction: ${scan.instruction}</p>`
-            : "";
-
-          header.innerHTML = `
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <p class="text-sm text-white font-semibold">Run ID • ${scan.run_id}</p>
-                <p class="text-xs text-[#707aa5]">Started ${new Date(scan.started_at).toLocaleString()}</p>
-              </div>
-              <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${badgeClass}">
-                ${scan.status}
-              </span>
-            </div>
-            <div class="flex flex-col gap-1 text-sm text-[#929bc9]">
-              <p>Targets: ${targets}</p>
-              ${instruction}
-              <p class="text-xs text-[#707aa5]">
-                Vulnerabilities: <span class="text-white font-semibold">${scan.vulnerability_count}</span>
-                ${scan.has_report ? "• Report ready" : ""}
-              </p>
-            </div>
-          `;
-        }
-
-        function createAgentBubble(content) {
-          const wrapper = document.createElement("div");
-          wrapper.className = "flex items-end gap-3 p-4";
-
-          const avatar = document.createElement("div");
-          avatar.className =
-            "bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0";
-          avatar.style.backgroundImage =
-            'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBCSaFAf3tTbzZiacbjC6V6zszcK5SMtye5TCT3AvkPnQIbaqk3rl2jfhczfnh9nn4JmtDUmlyleJPKnC8TsEUuZXe5x7omyq4Vr-R3R8MWHynzWzy-EP43Wxfa-yqL1IyTfnKeQyGJpBsQzoCdpfL2SrhHqtVLoIplpG5rSsw4G8yRkzwcgJcdEMNiCIsymmq_YjBYHWfmPraOHIzdccz-DCV9jF3d-BIPMPE2DnGVU_bhJkf6JA8_KWcE-kGSrHhnpdsOZLiLd7SD")';
-
-          const column = document.createElement("div");
-          column.className = "flex flex-1 flex-col gap-1 items-start";
-
-          const label = document.createElement("p");
-          label.className = "text-[#929bc9] text-[13px] font-medium";
-          label.textContent = "Strix Agent";
-
-          const bubble = document.createElement("div");
-          bubble.className =
-            "text-base leading-normal flex max-w-xl rounded-xl rounded-bl-none px-4 py-3 bg-gradient-to-r from-[#2A65F8] to-[#9833FF] text-white whitespace-pre-wrap";
-          bubble.textContent = content;
-
-          column.appendChild(label);
-          column.appendChild(bubble);
-
-          wrapper.appendChild(avatar);
-          wrapper.appendChild(column);
-          return wrapper;
-        }
-
-        function createUserBubble(content) {
-          const wrapper = document.createElement("div");
-          wrapper.className = "flex items-end gap-3 p-4 justify-end";
-
-          const column = document.createElement("div");
-          column.className = "flex flex-1 flex-col gap-1 items-end";
-
-          const label = document.createElement("p");
-          label.className =
-            "text-[#929bc9] text-[13px] font-medium text-right";
-          label.textContent = "You";
-
-          const bubble = document.createElement("div");
-          bubble.className =
-            "text-base leading-normal flex max-w-xl rounded-xl rounded-br-none px-4 py-3 bg-[#283149] text-white whitespace-pre-wrap";
-          bubble.textContent = content;
-
-          column.appendChild(label);
-          column.appendChild(bubble);
-
-          const avatar = document.createElement("div");
-          avatar.className =
-            "bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0";
-          avatar.style.backgroundImage =
-            'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDHjmfw2yGs2k-pm2b7HDinlnUbg2l8HNdHclmlx8k4zYMR3eYE1OS5KAV_5vgpihgo-9CRcHae0lhVy25giPtUSBC__Y7TiNLUsW-z_QgELRs6TXfRSn6AGMkGCmiCIdJfI3d3L26aED4tYvRuaHr5zYCsDat64bQC8-wpVaVta9EMgWb6lYwUdbqDBvjXN0f-kQZNYPHDhgHaONDUZk3PRJ5Wr1DkP68cAw0T8kaH_kvDfFmxi3_K5UEj-d4Hfrbfd46x2I1Fmu2S")';
-
-          wrapper.appendChild(column);
-          wrapper.appendChild(avatar);
-          return wrapper;
-        }
-
-        function createVulnerabilityCard(event) {
-          const wrapper = document.createElement("div");
-          wrapper.className = "flex items-end gap-3 p-4";
-
-          const avatar = document.createElement("div");
-          avatar.className =
-            "bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0";
-          avatar.style.backgroundImage =
-            'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDCqrIB1NCLOugcg98yI2qHcDtSKJzXNLTMZyGkD4mFWIv37KC3lTj8BUvBItMto6Da8NFBIzCt_uLKVN7zWNW95q6B4xWkNC5s-5J5NJ3zjB_sR8GfWBU3spBJa7YZf72k62l27MkZUwQzxbC9wKDg7-SgdOL426Gyf2GJjXcvedC67eGMMy3EhBhcN9HAszmZjTkCbOSPjGrygHE0G2KdCeK0X9Y-p_jlqfedELv03VWp_flb3Kg7j_D4jP6MwlF8bBz_qu1UBMOX")';
-
-          const column = document.createElement("div");
-          column.className = "flex flex-1 flex-col gap-2 items-start";
-
-          const heading = document.createElement("p");
-          heading.className = "text-[#929bc9] text-[13px] font-medium";
-          heading.textContent = "Strix Agent";
-
-          const severityClass =
-            severityColors[event.severity] || severityColors.info;
-
-          const card = document.createElement("div");
-          card.className =
-            "w-full max-w-xl rounded-xl rounded-bl-none bg-[#232948] border border-white/10 overflow-hidden";
-
-          card.innerHTML = `
-            <div class="bg-gradient-to-r ${severityClass} px-4 py-2 text-xs uppercase tracking-wide font-semibold">
-              ${event.severity.toUpperCase()}
-            </div>
-            <div class="px-4 py-3 text-white space-y-2">
-              <h3 class="text-base font-semibold">${event.title}</h3>
-              <p class="text-sm leading-relaxed whitespace-pre-wrap">${event.content}</p>
-            </div>
-          `;
-
-          column.appendChild(heading);
-          column.appendChild(card);
-
-          wrapper.appendChild(avatar);
-          wrapper.appendChild(column);
-          return wrapper;
-        }
-
-        function createSummaryCard(event) {
-          const wrapper = document.createElement("div");
-          wrapper.className = "flex items-end gap-3 p-4";
-
-          const avatar = document.createElement("div");
-          avatar.className =
-            "bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0";
-          avatar.style.backgroundImage =
-            'url("https://lh3.googleusercontent.com/aida-public/AB6AXuD-UJDcdIwOyjc2E9BrwKDx7oLVLt_rAPj1kFCqgFgcWc-WONyPEOycTNqUUwR7nmGo303Ei-yn1LoAlcI4wdYQ01yg2XomcdqV0M_hI3fzqr7ZUKCNsHZg3aWwLyguUU0QBHVq39ThEgCBwb-MKBPPwhn-hksXLsCHPUzpdTMEDNfzYovOeqx8X8C8ibdRudp9LM9oaLQw5AV6u_YMZx88qhAplgkOSfUXeI3Tt8-UmgHvr2D23pe6cBBHCWurZ0h1YsQHpM9Xd0rM")';
-
-          const column = document.createElement("div");
-          column.className = "flex flex-1 flex-col gap-1 items-start";
-
-          const label = document.createElement("p");
-          label.className = "text-[#929bc9] text-[13px] font-medium";
-          label.textContent = "Strix Agent";
-
-          const summary = document.createElement("div");
-          summary.className =
-            "text-base leading-normal flex max-w-xl rounded-xl rounded-bl-none px-4 py-3 bg-gradient-to-r from-[#2A65F8] to-[#9833FF] text-white whitespace-pre-wrap";
-          summary.textContent = event.content;
-
-          column.appendChild(label);
-          column.appendChild(summary);
-
-          wrapper.appendChild(avatar);
-          wrapper.appendChild(column);
-
-          return wrapper;
-        }
-
-        function renderChat(events, scan) {
-          const container = elements.chatFeed;
-          container.innerHTML = "";
-
-          if (!scan) {
-            container.innerHTML = `
-              <div class="rounded-lg border border-dashed border-white/10 p-6 text-center text-sm text-[#929bc9]">
-                <p class="font-medium text-white">Ready when you are 👋</p>
-                <p class="mt-2 leading-relaxed">
-                  Run <span class="text-white">https://media.io</span> or any other target to watch Strix work in real time.
-                </p>
-              </div>
-            `;
-            return;
-          }
-
-          if (!events || events.length === 0) {
-            const placeholder = document.createElement("div");
-            placeholder.className =
-              "rounded-lg border border-dashed border-white/10 p-6 text-center text-sm text-[#929bc9]";
-            placeholder.innerHTML = `
-              <p class="font-medium text-white">Scan running…</p>
-              <p class="mt-2 leading-relaxed">
-                Strix is preparing the environment. This can take a minute on first run while Docker pulls the agent image.
-              </p>
-            `;
-            container.appendChild(placeholder);
-          } else {
-            events.forEach((event) => {
-              if (event.type === "chat") {
-                if (event.role === "user") {
-                  container.appendChild(createUserBubble(event.content));
-                } else {
-                  container.appendChild(createAgentBubble(event.content));
-                }
-              } else if (event.type === "vulnerability") {
-                container.appendChild(createVulnerabilityCard(event));
-              } else if (event.type === "summary") {
-                container.appendChild(createSummaryCard(event));
-              }
-            });
-          }
-
-          if (elements.chatScroll) {
-            requestAnimationFrame(() => {
-              elements.chatScroll.scrollTop = elements.chatScroll.scrollHeight;
-            });
-          }
-        }
-
-        async function refreshScans() {
-          try {
-            const scans = await fetchJson("/api/scans");
-            scans.forEach((scan) => state.scans.set(scan.run_id, scan));
-            renderScanList();
-          } catch (error) {
-            console.error("Failed to load scans", error);
-            setStatusMessage(error.message || "Failed to load scans", "error");
-          }
-        }
-
-        async function loadScan(runId) {
-          try {
-            const [scan, events] = await Promise.all([
-              fetchJson(`/api/scans/${runId}`),
-              fetchJson(`/api/scans/${runId}/events`),
-            ]);
-            state.scans.set(runId, scan);
-            state.events.set(runId, events);
-            renderScanList();
-            renderRunHeader(scan);
-            renderChat(events, scan);
-            updateComposerState(scan);
-
-            if (scan.status === "completed") {
-              setStatusMessage("Scan completed. Open the summary for details.", "success");
-            } else if (scan.status === "failed") {
-              setStatusMessage(
-                `Scan failed: ${scan.error || "Unknown error"}`,
-                "error",
-              );
-            }
-
-            if (scan.status === "completed" || scan.status === "failed") {
-              stopPolling();
-            }
-          } catch (error) {
-            console.error("Failed to load scan", error);
-            setStatusMessage(error.message || "Failed to load scan", "error");
-          }
-        }
-
-        function updateComposerState(scan) {
-          const disabled = scan && (scan.status === "running" || scan.status === "starting");
-          elements.messageInput.disabled = disabled;
-          elements.sendButton.disabled = disabled;
-          elements.messageInput.placeholder = disabled
-            ? "Scan in progress… Sit tight!"
-            : "Enter a target URL or domain (e.g. https://media.io)";
-        }
-
-        function stopPolling() {
-          if (state.pollingHandle) {
-            clearInterval(state.pollingHandle);
-            state.pollingHandle = null;
-          }
-        }
-
-        function startPolling(runId) {
-          stopPolling();
-          state.pollingHandle = setInterval(() => {
-            if (!state.currentRunId || state.currentRunId !== runId) {
-              stopPolling();
+          function setStatusMessage(message, variant = "info") {
+            if (!elements.statusBanner) return;
+            if (!message) {
+              elements.statusBanner.classList.add("hidden");
+              elements.statusBanner.textContent = "";
               return;
             }
-            loadScan(runId);
-          }, state.pollInterval);
-        }
-
-        async function handleSend(event) {
-          event.preventDefault();
-          const value = elements.messageInput.value.trim();
-          if (!value) {
-            return;
+            elements.statusBanner.className =
+              "mb-4 rounded-lg px-4 py-3 text-sm " +
+              (statusStyles[variant] || statusStyles.info);
+            elements.statusBanner.textContent = message;
           }
 
-          const active = state.currentRunId
-            ? state.scans.get(state.currentRunId)
-            : null;
-          if (active && (active.status === "running" || active.status === "starting")) {
-            setStatusMessage("Hold up—current scan still running. Wait for it to finish.", "warning");
-            return;
-          }
-
-          elements.sendButton.disabled = true;
-          elements.messageInput.disabled = true;
-          try {
-            setStatusMessage("Launching scan… This can take a minute on first run.", "info");
-            const response = await fetchJson("/api/scans", {
-              method: "POST",
-              body: JSON.stringify({ targets: [value] }),
+          async function fetchJson(url, options = {}) {
+            const response = await fetch(url, {
+              headers: { "Content-Type": "application/json", Accept: "application/json" },
+              ...options,
             });
 
-            state.scans.set(response.run_id, response);
-            state.currentRunId = response.run_id;
-            state.events.set(response.run_id, []);
-
-            elements.messageInput.value = "";
-            setStatusMessage("Scan started. Strix is working on it now.", "info");
-
-            renderScanList();
-            renderRunHeader(response);
-            renderChat([], response);
-            updateComposerState(response);
-
-            await loadScan(response.run_id);
-            startPolling(response.run_id);
-          } catch (error) {
-            console.error("Failed to start scan", error);
-            setStatusMessage(error.message || "Failed to start scan", "error");
-            elements.messageInput.disabled = false;
-            elements.sendButton.disabled = false;
-          }
-        }
-
-        function selectScan(runId) {
-          if (state.currentRunId === runId) return;
-          state.currentRunId = runId;
-          stopPolling();
-          const scan = state.scans.get(runId);
-          renderScanList();
-          renderRunHeader(scan);
-          renderChat(state.events.get(runId) || [], scan);
-          updateComposerState(scan);
-          if (scan && (scan.status === "running" || scan.status === "starting")) {
-            startPolling(runId);
-          }
-        }
-
-        async function handleNewScanClick(event) {
-          event.preventDefault();
-          stopPolling();
-          state.currentRunId = null;
-          updateComposerState(null);
-          renderRunHeader(null);
-          renderChat(null, null);
-          setStatusMessage("Enter a target to launch a new scan.", "info");
-          elements.messageInput.focus();
-        }
-
-        async function initStatus() {
-          try {
-            const status = await fetchJson("/api/status");
-            if (status.error) {
-              setStatusMessage(status.error, "warning");
-            } else if (!status.initialized) {
-              setStatusMessage(
-                "Environment warming up. First request may take longer while Docker image pulls.",
-                "info",
-              );
+            const text = await response.text();
+            const data = text ? JSON.parse(text) : null;
+            if (!response.ok) {
+              const message =
+                data && data.detail
+                  ? data.detail
+                  : `Request failed (${response.status})`;
+              const error = new Error(message);
+              error.status = response.status;
+              error.payload = data;
+              throw error;
             }
-          } catch (error) {
-            console.error("Failed to fetch status", error);
+            return data;
           }
-        }
 
-        function init() {
-          elements.composerForm.addEventListener("submit", handleSend);
-          elements.newScanLink.addEventListener("click", handleNewScanClick);
-          initStatus();
-          refreshScans();
-        }
+          function openSidebarPanel() {
+            if (!elements.sidebar) return;
+            elements.sidebar.classList.remove("-translate-x-full");
+            if (elements.sidebarBackdrop) {
+              elements.sidebarBackdrop.classList.remove("hidden");
+            }
+          }
 
-        init();
-      });
-    </script>
+          function closeSidebarPanel() {
+            if (!elements.sidebar) return;
+            elements.sidebar.classList.add("-translate-x-full");
+            if (elements.sidebarBackdrop) {
+              elements.sidebarBackdrop.classList.add("hidden");
+            }
+          }
+
+          function handleGlobalKeydown(event) {
+            if (event.key === "Escape") {
+              closeSidebarPanel();
+            }
+          }
+
+          function renderScanList() {
+            const container = elements.scanList;
+            container.innerHTML = "";
+
+            if (state.scans.size === 0) {
+              container.innerHTML = `
+                <div class="flex flex-col gap-2 rounded-lg border border-dashed border-white/10 p-3 text-[#929bc9] text-sm">
+                  <p class="font-medium text-white">No scans yet</p>
+                  <p class="leading-normal text-xs text-[#707aa5]">
+                    Start by entering a target URL or domain below. Your recent scans will appear here.
+                  </p>
+                </div>
+              `;
+              return;
+            }
+
+            state.scans.forEach((scan, runId) => {
+              const isActive = state.currentRunId === runId;
+              const item = document.createElement("a");
+              item.dataset.runId = runId;
+              item.className =
+                "flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 group cursor-pointer transition";
+
+              if (isActive) {
+                item.classList.add("bg-primary/20", "text-primary");
+              }
+
+              const icon = document.createElement("span");
+              icon.className =
+                "material-symbols-outlined text-[#929bc9] group-hover:text-white transition";
+              icon.style.fontSize = "24px";
+              icon.textContent =
+                scan.status === "running" || scan.status === "starting" ? "sync" : "history";
+              if (isActive) {
+                icon.classList.add("text-primary");
+              }
+              item.appendChild(icon);
+
+              const label = document.createElement("div");
+              label.className = "flex flex-col";
+              const title = document.createElement("p");
+              title.className =
+                "text-sm font-medium leading-normal " +
+                (isActive ? "text-white" : "text-[#929bc9] group-hover:text-white");
+
+              const firstTarget = (scan.targets && scan.targets[0]) || scan.run_id;
+              title.textContent = firstTarget.length > 32 ? firstTarget.slice(0, 32) + "…" : firstTarget;
+
+              const sub = document.createElement("p");
+              sub.className = "text-xs text-[#707aa5]";
+              sub.textContent = scan.status === "running" ? "Running…" : scan.status;
+
+              label.appendChild(title);
+              label.appendChild(sub);
+
+              item.appendChild(label);
+              item.addEventListener("click", () => selectScan(runId));
+
+              container.appendChild(item);
+            });
+          }
+
+          function renderRunHeader(scan) {
+            const header = elements.runHeader;
+            if (!scan) {
+              header.innerHTML = `
+                <p class="text-sm text-white font-semibold">Start a new Strix scan</p>
+                <p>Enter a target (URL or domain). Scans run in your Cloud Shell session and results save under <code>agent_runs/</code>.</p>
+              `;
+              if (elements.runSubtitle) {
+                elements.runSubtitle.textContent = "Launch a scan to see live progress updates.";
+              }
+              return;
+            }
+
+            const badgeClass = statusBadges[scan.status] || "bg-[#283149] text-white";
+            const targets = (scan.targets || [])
+              .map((target) => `<code class="text-white">${target}</code>`)
+              .join(", ");
+            const instruction = scan.instruction
+              ? `<p class="text-xs text-[#707aa5] truncate">Instruction: ${scan.instruction}</p>`
+              : "";
+
+            header.innerHTML = `
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-sm text-white font-semibold">Run ID • ${scan.run_id}</p>
+                  <p class="text-xs text-[#707aa5]">Started ${new Date(scan.started_at).toLocaleString()}</p>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${badgeClass}">
+                  ${scan.status}
+                </span>
+              </div>
+              <div class="flex flex-col gap-1 text-sm text-[#929bc9]">
+                <p>Targets: ${targets}</p>
+                ${instruction}
+                <p class="text-xs text-[#707aa5]">
+                  Vulnerabilities: <span class="text-white font-semibold">${scan.vulnerability_count}</span>
+                  ${scan.has_report ? "• Report ready" : ""}
+                </p>
+              </div>
+            `;
+
+            if (elements.runSubtitle) {
+              const statusText =
+                scan.status === "running"
+                  ? "Running scan – live updates below."
+                  : scan.status === "completed"
+                    ? "Scan complete – review the summary and findings."
+                    : scan.status === "failed"
+                      ? `Scan failed – ${scan.error || "check the details below."}`
+                      : `Status: ${scan.status}`;
+              elements.runSubtitle.textContent = statusText;
+            }
+          }
+
+          function createAgentBubble(content) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "flex items-end gap-3 p-4";
+
+            const avatar = document.createElement("div");
+            avatar.className =
+              "bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0";
+            avatar.style.backgroundImage =
+              'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBCSaFAf3tTbzZiacbjC6V6zszcK5SMtye5TCT3AvkPnQIbaqk3rl2jfhczfnh9nn4JmtDUmlyleJPKnC8TsEUuZXe5x7omyq4Vr-R3R8MWHynzWzy-EP43Wxfa-yqL1IyTfnKeQyGJpBsQzoCdpfL2SrhHqtVLoIplpG5rSsw4G8yRkzwcgJcdEMNiCIsymmq_YjBYHWfmPraOHIzdccz-DCV9jF3d-BIPMPE2DnGVU_bhJkf6JA8_KWcE-kGSrHhnpdsOZLiLd7SD")';
+
+            const column = document.createElement("div");
+            column.className = "flex w-full max-w-full flex-col items-start gap-1 md:max-w-2xl";
+
+            const label = document.createElement("p");
+            label.className = "text-[#929bc9] text-[13px] font-medium";
+            label.textContent = "Strix Agent";
+
+            const bubble = document.createElement("div");
+            bubble.className =
+              "flex w-full max-w-full rounded-xl rounded-bl-none bg-gradient-to-r from-[#2A65F8] to-[#9833FF] px-4 py-3 text-base leading-normal text-white whitespace-pre-wrap md:max-w-2xl";
+            bubble.textContent = content;
+
+            column.appendChild(label);
+            column.appendChild(bubble);
+
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(column);
+            return wrapper;
+          }
+
+          function createUserBubble(content) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "flex items-end justify-end gap-3 p-4";
+
+            const column = document.createElement("div");
+            column.className = "flex w-full max-w-full flex-col items-end gap-1 md:max-w-2xl";
+
+            const label = document.createElement("p");
+            label.className =
+              "text-[#929bc9] text-[13px] font-medium text-right";
+            label.textContent = "You";
+
+            const bubble = document.createElement("div");
+            bubble.className =
+              "flex w-full max-w-full rounded-xl rounded-br-none bg-[#283149] px-4 py-3 text-base leading-normal text-white whitespace-pre-wrap md:max-w-2xl";
+            bubble.textContent = content;
+
+            column.appendChild(label);
+            column.appendChild(bubble);
+
+            const avatar = document.createElement("div");
+            avatar.className =
+              "bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0";
+            avatar.style.backgroundImage =
+              'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDHjmfw2yGs2k-pm2b7HDinlnUbg2l8HNdHclmlx8k4zYMR3eYE1OS5KAV_5vgpihgo-9CRcHae0lhVy25giPtUSBC__Y7TiNLUsW-z_QgELRs6TXfRSn6AGMkGCmiCIdJfI3d3L26aED4tYvRuaHr5zYCsDat64bQC8-wpVaVta9EMgWb6lYwUdbqDBvjXN0f-kQZNYPHDhgHaONDUZk3PRJ5Wr1DkP68cAw0T8kaH_kvDfFmxi3_K5UEj-d4Hfrbfd46x2I1Fmu2S")';
+
+            wrapper.appendChild(column);
+            wrapper.appendChild(avatar);
+            return wrapper;
+          }
+
+          function createVulnerabilityCard(event) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "flex items-end gap-3 p-4";
+
+            const avatar = document.createElement("div");
+            avatar.className =
+              "bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0";
+            avatar.style.backgroundImage =
+              'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDCqrIB1NCLOugcg98yI2qHcDtSKJzXNLTMZyGkD4mFWIv37KC3lTj8BUvBItMto6Da8NFBIzCt_uLKVN7zWNW95q6B4xWkNC5s-5J5NJ3zjB_sR8GfWBU3spBJa7YZf72k62l27MkZUwQzxbC9wKDg7-SgdOL426Gyf2GJjXcvedC67eGMMy3EhBhcN9HAszmZjTkCbOSPjGrygHE0G2KdCeK0X9Y-p_jlqfedELv03VWp_flb3Kg7j_D4jP6MwlF8bBz_qu1UBMOX")';
+
+            const column = document.createElement("div");
+            column.className = "flex w-full max-w-full flex-col items-start gap-2 md:max-w-2xl";
+
+            const heading = document.createElement("p");
+            heading.className = "text-[#929bc9] text-[13px] font-medium";
+            heading.textContent = "Strix Agent";
+
+            const severityClass =
+              severityColors[event.severity] || severityColors.info;
+
+            const card = document.createElement("div");
+            card.className =
+              "w-full rounded-xl rounded-bl-none border border-white/10 bg-[#232948] overflow-hidden";
+
+            card.innerHTML = `
+              <div class="bg-gradient-to-r ${severityClass} px-4 py-2 text-xs uppercase tracking-wide font-semibold">
+                ${event.severity.toUpperCase()}
+              </div>
+              <div class="px-4 py-3 text-white space-y-2">
+                <h3 class="text-base font-semibold">${event.title}</h3>
+                <p class="text-sm leading-relaxed whitespace-pre-wrap">${event.content}</p>
+              </div>
+            `;
+
+            column.appendChild(heading);
+            column.appendChild(card);
+
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(column);
+            return wrapper;
+          }
+
+          function createSummaryCard(event) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "flex items-end gap-3 p-4";
+
+            const avatar = document.createElement("div");
+            avatar.className =
+              "bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0";
+            avatar.style.backgroundImage =
+              'url("https://lh3.googleusercontent.com/aida-public/AB6AXuD-UJDcdIwOyjc2E9BrwKDx7oLVLt_rAPj1kFCqgFgcWc-WONyPEOycTNqUUwR7nmGo303Ei-yn1LoAlcI4wdYQ01yg2XomcdqV0M_hI3fzqr7ZUKCNsHZg3aWwLyguUU0QBHVq39ThEgCBwb-MKBPPwhn-hksXLsCHPUzpdTMEDNfzYovOeqx8X8C8ibdRudp9LM9oaLQw5AV6u_YMZx88qhAplgkOSfUXeI3Tt8-UmgHvr2D23pe6cBBHCWurZ0h1YsQHpM9Xd0rM")';
+
+            const column = document.createElement("div");
+            column.className = "flex w-full max-w-full flex-col items-start gap-1 md:max-w-2xl";
+
+            const label = document.createElement("p");
+            label.className = "text-[#929bc9] text-[13px] font-medium";
+            label.textContent = "Strix Agent";
+
+            const summary = document.createElement("div");
+            summary.className =
+              "flex w-full max-w-full rounded-xl rounded-bl-none bg-gradient-to-r from-[#2A65F8] to-[#9833FF] px-4 py-3 text-base leading-normal text-white whitespace-pre-wrap md:max-w-2xl";
+            summary.textContent = event.content;
+
+            column.appendChild(label);
+            column.appendChild(summary);
+
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(column);
+
+            return wrapper;
+          }
+
+          function createTerminalCard(event) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "flex items-start gap-3 p-4";
+
+            const avatar = document.createElement("div");
+            avatar.className =
+              "bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0";
+            avatar.style.backgroundImage =
+              'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAo7X7bfEfAmlYVnyG6I83N_W5R6KLOs3zpDQt0auiIYLhjcD6AMbTBfS1RGJhydnRtcQcKnsGAsCQQVBQKomCaYWF0pHp2T2q1bxh8sTZB86BpQBht6LjZjOBrPalCbuCSp_5W10nFJNm5ZHhKw-o1wb_bwXqlCdyJldCh_pwtnTHCd00");';
+
+            const column = document.createElement("div");
+            column.className = "flex w-full max-w-full flex-col gap-2 md:max-w-2xl";
+
+            const heading = document.createElement("div");
+            heading.className = "flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-[#929bc9]";
+            const commandLabel = document.createElement("span");
+            commandLabel.className = "font-semibold text-white";
+            commandLabel.textContent = "Terminal Action";
+            const status = document.createElement("span");
+            status.className =
+              "inline-flex items-center gap-1 rounded-full bg-white/5 px-2.5 py-1 text-[11px] font-medium text-white";
+            status.textContent = (event.status || "unknown").toUpperCase();
+            heading.appendChild(commandLabel);
+            heading.appendChild(status);
+
+            const card = document.createElement("div");
+            card.className =
+              "w-full rounded-xl border border-white/10 bg-[#1b223d] p-4 shadow-lg shadow-black/10";
+
+            const commandLine = document.createElement("p");
+            commandLine.className = "truncate text-sm font-semibold text-white";
+            commandLine.textContent = event.command || "(no command)";
+
+            const meta = document.createElement("p");
+            meta.className = "text-xs text-[#707aa5]";
+            const directory = event.working_dir ? ` • ${event.working_dir}` : "";
+            const exitCode =
+              typeof event.exit_code === "number" ? ` • Exit ${event.exit_code}` : "";
+            meta.textContent = `Terminal: ${event.terminal_id}${directory}${exitCode}`;
+
+            card.appendChild(commandLine);
+            card.appendChild(meta);
+
+            if (event.output) {
+              const details = document.createElement("details");
+              details.className =
+                "group mt-2 w-full overflow-hidden rounded-lg border border-white/5 bg-black/20 text-white";
+              const summary = document.createElement("summary");
+              summary.className =
+                "flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-sm font-medium text-white/80 transition group-open:bg-white/10";
+              summary.innerHTML =
+                '<span class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-primary">terminal</span>View command output</span><span class="material-symbols-outlined text-sm">expand_more</span>';
+              const pre = document.createElement("pre");
+              pre.className = "max-h-64 overflow-auto bg-black/40 px-4 py-3 text-xs leading-relaxed text-[#cbd5f5]";
+              pre.textContent = event.output;
+              details.appendChild(summary);
+              details.appendChild(pre);
+              card.appendChild(details);
+            } else if (event.error) {
+              const errorBox = document.createElement("div");
+              errorBox.className =
+                "mt-3 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-200";
+              errorBox.textContent = event.error;
+              card.appendChild(errorBox);
+            }
+
+            column.appendChild(heading);
+            column.appendChild(card);
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(column);
+            return wrapper;
+          }
+
+          function renderChat(events, scan) {
+            const container = elements.chatFeed;
+            container.innerHTML = "";
+
+            if (!scan) {
+              container.innerHTML = `
+                <div class="rounded-lg border border-dashed border-white/10 p-6 text-center text-sm text-[#929bc9]">
+                  <p class="font-medium text-white">Ready when you are 👋</p>
+                  <p class="mt-2 leading-relaxed">
+                    Run <span class="text-white">https://media.io</span> or any other target to watch Strix work in real time.
+                  </p>
+                </div>
+              `;
+              return;
+            }
+
+            if (!events || events.length === 0) {
+              const placeholder = document.createElement("div");
+              placeholder.className =
+                "rounded-lg border border-dashed border-white/10 p-6 text-center text-sm text-[#929bc9]";
+              placeholder.innerHTML = `
+                <p class="font-medium text-white">Scan running…</p>
+                <p class="mt-2 leading-relaxed">
+                  Strix is preparing the environment. This can take a minute on first run while Docker pulls the agent image.
+                </p>
+              `;
+              container.appendChild(placeholder);
+            } else {
+              events.forEach((event) => {
+                if (event.type === "chat") {
+                  if (event.role === "user") {
+                    container.appendChild(createUserBubble(event.content));
+                  } else {
+                    container.appendChild(createAgentBubble(event.content));
+                  }
+                } else if (event.type === "vulnerability") {
+                  container.appendChild(createVulnerabilityCard(event));
+                } else if (event.type === "summary") {
+                  container.appendChild(createSummaryCard(event));
+                } else if (event.type === "terminal") {
+                  container.appendChild(createTerminalCard(event));
+                }
+              });
+            }
+
+            if (elements.chatScroll) {
+              requestAnimationFrame(() => {
+                elements.chatScroll.scrollTop = elements.chatScroll.scrollHeight;
+              });
+            }
+          }
+
+          async function refreshScans() {
+            if (elements.refreshScans) {
+              elements.refreshScans.disabled = true;
+              elements.refreshScans.classList.add("opacity-60", "cursor-not-allowed");
+            }
+
+            try {
+              const scans = await fetchJson("/api/scans");
+              state.scans.clear();
+              scans.forEach((scan) => state.scans.set(scan.run_id, scan));
+              renderScanList();
+            } catch (error) {
+              console.error("Failed to load scans", error);
+              setStatusMessage(error.message || "Failed to load scans", "error");
+            } finally {
+              const active =
+                state.currentRunId && state.scans.has(state.currentRunId)
+                  ? state.scans.get(state.currentRunId)
+                  : null;
+              updateComposerState(active || null);
+            }
+          }
+
+          async function loadScan(runId) {
+            try {
+              const [scan, events] = await Promise.all([
+                fetchJson(`/api/scans/${runId}`),
+                fetchJson(`/api/scans/${runId}/events`),
+              ]);
+              state.scans.set(runId, scan);
+              state.events.set(runId, events);
+              renderScanList();
+              renderRunHeader(scan);
+              renderChat(events, scan);
+              updateComposerState(scan);
+
+              if (scan.status === "completed") {
+                setStatusMessage("Scan completed. Open the summary for details.", "success");
+              } else if (scan.status === "failed") {
+                setStatusMessage(
+                  `Scan failed: ${scan.error || "Unknown error"}`,
+                  "error",
+                );
+              }
+
+              if (scan.status === "completed" || scan.status === "failed") {
+                stopPolling();
+              }
+            } catch (error) {
+              console.error("Failed to load scan", error);
+              setStatusMessage(error.message || "Failed to load scan", "error");
+            }
+          }
+
+          function updateComposerState(scan) {
+            const disabled = scan && (scan.status === "running" || scan.status === "starting");
+            elements.messageInput.disabled = disabled;
+            elements.sendButton.disabled = disabled;
+            elements.messageInput.placeholder = disabled
+              ? "Scan in progress… Sit tight!"
+              : "Enter a target URL or domain (e.g. https://media.io)";
+
+            if (elements.sendButton) {
+              elements.sendButton.classList.toggle("opacity-60", disabled);
+              elements.sendButton.classList.toggle("cursor-not-allowed", disabled);
+            }
+
+            if (elements.refreshScans) {
+              elements.refreshScans.disabled = disabled;
+              elements.refreshScans.classList.toggle("opacity-60", disabled);
+              elements.refreshScans.classList.toggle("cursor-not-allowed", disabled);
+            }
+          }
+
+          function stopPolling() {
+            if (state.pollingHandle) {
+              clearInterval(state.pollingHandle);
+              state.pollingHandle = null;
+            }
+          }
+
+          function startPolling(runId) {
+            stopPolling();
+            state.pollingHandle = setInterval(() => {
+              if (!state.currentRunId || state.currentRunId !== runId) {
+                stopPolling();
+                return;
+              }
+              loadScan(runId);
+            }, state.pollInterval);
+          }
+
+          async function handleSend(event) {
+            event.preventDefault();
+            const value = elements.messageInput.value.trim();
+            if (!value) {
+              return;
+            }
+
+            const active = state.currentRunId
+              ? state.scans.get(state.currentRunId)
+              : null;
+            if (active && (active.status === "running" || active.status === "starting")) {
+              setStatusMessage("Hold up—current scan still running. Wait for it to finish.", "warning");
+              return;
+            }
+
+            elements.sendButton.disabled = true;
+            elements.messageInput.disabled = true;
+            try {
+              setStatusMessage("Launching scan… This can take a minute on first run.", "info");
+              const response = await fetchJson("/api/scans", {
+                method: "POST",
+                body: JSON.stringify({ targets: [value] }),
+              });
+
+              state.scans.set(response.run_id, response);
+              state.currentRunId = response.run_id;
+              state.events.set(response.run_id, []);
+
+              elements.messageInput.value = "";
+              setStatusMessage("Scan started. Strix is working on it now.", "info");
+
+              renderScanList();
+              renderRunHeader(response);
+              renderChat([], response);
+              updateComposerState(response);
+
+              await loadScan(response.run_id);
+              startPolling(response.run_id);
+            } catch (error) {
+              console.error("Failed to start scan", error);
+              setStatusMessage(error.message || "Failed to start scan", "error");
+              elements.messageInput.disabled = false;
+              elements.sendButton.disabled = false;
+              const activeRun =
+                state.currentRunId && state.scans.has(state.currentRunId)
+                  ? state.scans.get(state.currentRunId)
+                  : null;
+              updateComposerState(activeRun || null);
+            }
+          }
+
+          function selectScan(runId) {
+            if (state.currentRunId === runId) return;
+            state.currentRunId = runId;
+            stopPolling();
+            const scan = state.scans.get(runId);
+            renderScanList();
+            renderRunHeader(scan);
+            renderChat(state.events.get(runId) || [], scan);
+            updateComposerState(scan);
+            if (scan && (scan.status === "running" || scan.status === "starting")) {
+              startPolling(runId);
+            }
+            if (window.innerWidth < 1024) {
+              closeSidebarPanel();
+            }
+          }
+
+          async function handleNewScanClick(event) {
+            event.preventDefault();
+            stopPolling();
+            state.currentRunId = null;
+            updateComposerState(null);
+            renderRunHeader(null);
+            renderChat(null, null);
+            setStatusMessage("Enter a target to launch a new scan.", "info");
+            elements.messageInput.focus();
+            if (window.innerWidth < 1024) {
+              closeSidebarPanel();
+            }
+          }
+
+          async function initStatus() {
+            try {
+              const status = await fetchJson("/api/status");
+              if (status.error) {
+                setStatusMessage(status.error, "warning");
+              } else if (!status.initialized) {
+                setStatusMessage(
+                  "Environment warming up. First request may take longer while Docker image pulls.",
+                  "info",
+                );
+              }
+            } catch (error) {
+              console.error("Failed to fetch status", error);
+            }
+          }
+
+          function init() {
+            elements.composerForm.addEventListener("submit", handleSend);
+            elements.newScanLink.addEventListener("click", handleNewScanClick);
+            if (elements.openSidebar) {
+              elements.openSidebar.addEventListener("click", openSidebarPanel);
+            }
+            if (elements.closeSidebar) {
+              elements.closeSidebar.addEventListener("click", closeSidebarPanel);
+            }
+            if (elements.sidebarBackdrop) {
+              elements.sidebarBackdrop.addEventListener("click", closeSidebarPanel);
+            }
+            if (elements.refreshScans) {
+              elements.refreshScans.addEventListener("click", refreshScans);
+            }
+            document.addEventListener("keydown", handleGlobalKeydown);
+            initStatus();
+            refreshScans();
+          }
+
+          init();
+        });
+      </script>
   </body>
 </html>
