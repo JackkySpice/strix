@@ -306,6 +306,30 @@ def _serialize_events(record: ScanRecord) -> list[dict[str, Any]]:
             }
         )
 
+    for execution_id, execution in tracer.tool_executions.items():
+        if execution.get("tool_name") != "terminal_execute":
+            continue
+
+        args = execution.get("args") or {}
+        result = execution.get("result") or {}
+        timestamp = execution.get("completed_at") or execution.get("timestamp")
+
+        events.append(
+            {
+                "id": f"terminal-{execution_id}",
+                "type": "terminal",
+                "command": args.get("command") or "",
+                "is_input": bool(args.get("is_input")),
+                "status": execution.get("status", "unknown"),
+                "exit_code": result.get("exit_code"),
+                "output": result.get("content") or "",
+                "error": result.get("error"),
+                "terminal_id": args.get("terminal_id") or result.get("terminal_id") or "default",
+                "working_dir": result.get("working_dir"),
+                "timestamp": timestamp,
+            }
+        )
+
     for report in tracer.vulnerability_reports:
         events.append(
             {
