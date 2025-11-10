@@ -10,6 +10,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from typing import NamedTuple
 
 import litellm
 from docker.errors import DockerException
@@ -18,6 +19,12 @@ from rich.panel import Panel
 from rich.text import Text
 
 from strix.interface.cli import run_cli
+from strix.interface.exceptions import (
+    DockerImagePullError,
+    DockerUnavailableError,
+    EnvironmentValidationError,
+    LLMWarmupError,
+)
 from strix.interface.tui import run_tui
 from strix.interface.utils import (
     assign_workspace_subdirs,
@@ -39,10 +46,14 @@ from strix.telemetry.tracer import get_global_tracer
 logging.getLogger().setLevel(logging.ERROR)
 
 
-def validate_environment() -> None:  # noqa: PLR0912, PLR0915
-    console = Console()
-    missing_required_vars = []
-    missing_optional_vars = []
+class EnvironmentCheck(NamedTuple):
+    missing_required: list[str]
+    missing_optional: list[str]
+
+
+def check_environment_variables() -> EnvironmentCheck:
+    missing_required_vars: list[str] = []
+    missing_optional_vars: list[str] = []
 
     if not os.getenv("STRIX_LLM"):
         missing_required_vars.append("STRIX_LLM")
@@ -68,125 +79,25 @@ def validate_environment() -> None:  # noqa: PLR0912, PLR0915
     if not os.getenv("PERPLEXITY_API_KEY"):
         missing_optional_vars.append("PERPLEXITY_API_KEY")
 
-    if missing_required_vars:
-        error_text = Text()
-        error_text.append("❌ ", style="bold red")
-        error_text.append("MISSING REQUIRED ENVIRONMENT VARIABLES", style="bold red")
-        error_text.append("\n\n", style="white")
+    return EnvironmentCheck(missing_required_vars, missing_optional_vars)
 
-        for var in missing_required_vars:
-            error_text.append(f"• {var}", style="bold yellow")
-            error_text.append(" is not set\n", style="white")
 
-        if missing_optional_vars:
-            error_text.append("\nOptional environment variables:\n", style="dim white")
-            for var in missing_optional_vars:
-                error_text.append(f"• {var}", style="dim yellow")
-                error_text.append(" is not set\n", style="dim white")
-
-        error_text.append("\nRequired environment variables:\n", style="white")
-        for var in missing_required_vars:
-            if var == "STRIX_LLM":
-                error_text.append("• ", style="white")
-                error_text.append("STRIX_LLM", style="bold cyan")
-                error_text.append(
-                    " - Model name to use with litellm (e.g., 'openai/gpt-5')\n",
-                    style="white",
-                )
-            elif var == "LLM_API_KEY":
-                error_text.append("• ", style="white")
-                error_text.append("LLM_API_KEY", style="bold cyan")
-                error_text.append(
-                    " - API key for the LLM provider (required for cloud providers)\n",
-                    style="white",
-                )
-
-        if missing_optional_vars:
-            error_text.append("\nOptional environment variables:\n", style="white")
-            for var in missing_optional_vars:
-                if var == "LLM_API_KEY":
-                    error_text.append("• ", style="white")
-                    error_text.append("LLM_API_KEY", style="bold cyan")
-                    error_text.append(" - API key for the LLM provider\n", style="white")
-                elif var == "LLM_API_BASE":
-                    error_text.append("• ", style="white")
-                    error_text.append("LLM_API_BASE", style="bold cyan")
-                    error_text.append(
-                        " - Custom API base URL if using local models (e.g., Ollama, LMStudio)\n",
-                        style="white",
-                    )
-                elif var == "PERPLEXITY_API_KEY":
-                    error_text.append("• ", style="white")
-                    error_text.append("PERPLEXITY_API_KEY", style="bold cyan")
-                    error_text.append(
-                        " - API key for Perplexity AI web search (enables real-time research)\n",
-                        style="white",
-                    )
-
-        error_text.append("\nExample setup:\n", style="white")
-        error_text.append("export STRIX_LLM='openai/gpt-5'\n", style="dim white")
-
-        if "LLM_API_KEY" in missing_required_vars:
-            error_text.append("export LLM_API_KEY='your-api-key-here'\n", style="dim white")
-
-        if missing_optional_vars:
-            for var in missing_optional_vars:
-                if var == "LLM_API_KEY":
-                    error_text.append(
-                        "export LLM_API_KEY='your-api-key-here'  # optional with local models\n",
-                        style="dim white",
-                    )
-                elif var == "LLM_API_BASE":
-                    error_text.append(
-                        "export LLM_API_BASE='http://localhost:11434'  "
-                        "# needed for local models only\n",
-                        style="dim white",
-                    )
-                elif var == "PERPLEXITY_API_KEY":
-                    error_text.append(
-                        "export PERPLEXITY_API_KEY='your-perplexity-key-here'\n", style="dim white"
-                    )
-
-        panel = Panel(
-            error_text,
-            title="[bold red]🛡️  STRIX CONFIGURATION ERROR",
-            title_align="center",
-            border_style="red",
-            padding=(1, 2),
+def validate_environment() -> EnvironmentCheck:
+    env_check = check_environment_variables()
+    if env_check.missing_required:
+        raise EnvironmentValidationError(
+            env_check.missing_required,
+            env_check.missing_optional,
         )
-
-        console.print("\n")
-        console.print(panel)
-        console.print()
-        sys.exit(1)
+    return env_check
 
 
 def check_docker_installed() -> None:
     if shutil.which("docker") is None:
-        console = Console()
-        error_text = Text()
-        error_text.append("❌ ", style="bold red")
-        error_text.append("DOCKER NOT INSTALLED", style="bold red")
-        error_text.append("\n\n", style="white")
-        error_text.append("The 'docker' CLI was not found in your PATH.\n", style="white")
-        error_text.append(
-            "Please install Docker and ensure the 'docker' command is available.\n\n", style="white"
-        )
-
-        panel = Panel(
-            error_text,
-            title="[bold red]🛡️  STRIX STARTUP ERROR",
-            title_align="center",
-            border_style="red",
-            padding=(1, 2),
-        )
-        console.print("\n", panel, "\n")
-        sys.exit(1)
+        raise DockerUnavailableError("The 'docker' CLI was not found in PATH")
 
 
 async def warm_up_llm() -> None:
-    console = Console()
-
     try:
         model_name = os.getenv("STRIX_LLM", "openai/gpt-5")
         api_key = os.getenv("LLM_API_KEY")
@@ -216,26 +127,7 @@ async def warm_up_llm() -> None:
         validate_llm_response(response)
 
     except Exception as e:  # noqa: BLE001
-        error_text = Text()
-        error_text.append("❌ ", style="bold red")
-        error_text.append("LLM CONNECTION FAILED", style="bold red")
-        error_text.append("\n\n", style="white")
-        error_text.append("Could not establish connection to the language model.\n", style="white")
-        error_text.append("Please check your configuration and try again.\n", style="white")
-        error_text.append(f"\nError: {e}", style="dim white")
-
-        panel = Panel(
-            error_text,
-            title="[bold red]🛡️  STRIX STARTUP ERROR",
-            title_align="center",
-            border_style="red",
-            padding=(1, 2),
-        )
-
-        console.print("\n")
-        console.print(panel)
-        console.print()
-        sys.exit(1)
+        raise LLMWarmupError(str(e)) from e
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -415,23 +307,7 @@ def pull_docker_image() -> None:
                 last_update = process_pull_line(line, layers_info, status, last_update)
 
         except DockerException as e:
-            console.print()
-            error_text = Text()
-            error_text.append("❌ ", style="bold red")
-            error_text.append("FAILED TO PULL IMAGE", style="bold red")
-            error_text.append("\n\n", style="white")
-            error_text.append(f"Could not download: {STRIX_IMAGE}\n", style="white")
-            error_text.append(str(e), style="dim red")
-
-            panel = Panel(
-                error_text,
-                title="[bold red]🛡️  DOCKER PULL ERROR",
-                title_align="center",
-                border_style="red",
-                padding=(1, 2),
-            )
-            console.print(panel, "\n")
-            sys.exit(1)
+            raise DockerImagePullError(STRIX_IMAGE, str(e)) from e
 
     success_text = Text()
     success_text.append("✅ ", style="bold green")
@@ -440,17 +316,196 @@ def pull_docker_image() -> None:
     console.print()
 
 
+def render_environment_error(exc: EnvironmentValidationError) -> None:  # noqa: PLR0912
+    console = Console()
+    missing_required_vars = exc.missing_required
+    missing_optional_vars = exc.missing_optional
+
+    error_text = Text()
+    error_text.append("❌ ", style="bold red")
+    error_text.append("MISSING REQUIRED ENVIRONMENT VARIABLES", style="bold red")
+    error_text.append("\n\n", style="white")
+
+    for var in missing_required_vars:
+        error_text.append(f"• {var}", style="bold yellow")
+        error_text.append(" is not set\n", style="white")
+
+    if missing_optional_vars:
+        error_text.append("\nOptional environment variables:\n", style="dim white")
+        for var in missing_optional_vars:
+            error_text.append(f"• {var}", style="dim yellow")
+            error_text.append(" is not set\n", style="dim white")
+
+    error_text.append("\nRequired environment variables:\n", style="white")
+    for var in missing_required_vars:
+        if var == "STRIX_LLM":
+            error_text.append("• ", style="white")
+            error_text.append("STRIX_LLM", style="bold cyan")
+            error_text.append(
+                " - Model name to use with litellm (e.g., 'openai/gpt-5')\n",
+                style="white",
+            )
+        elif var == "LLM_API_KEY":
+            error_text.append("• ", style="white")
+            error_text.append("LLM_API_KEY", style="bold cyan")
+            error_text.append(
+                " - API key for the LLM provider (required for cloud providers)\n",
+                style="white",
+            )
+
+    if missing_optional_vars:
+        error_text.append("\nOptional environment variables:\n", style="white")
+        for var in missing_optional_vars:
+            if var == "LLM_API_KEY":
+                error_text.append("• ", style="white")
+                error_text.append("LLM_API_KEY", style="bold cyan")
+                error_text.append(" - API key for the LLM provider\n", style="white")
+            elif var == "LLM_API_BASE":
+                error_text.append("• ", style="white")
+                error_text.append("LLM_API_BASE", style="bold cyan")
+                error_text.append(
+                    " - Custom API base URL if using local models (e.g., Ollama, LMStudio)\n",
+                    style="white",
+                )
+            elif var == "PERPLEXITY_API_KEY":
+                error_text.append("• ", style="white")
+                error_text.append("PERPLEXITY_API_KEY", style="bold cyan")
+                error_text.append(
+                    " - API key for Perplexity AI web search (enables real-time research)\n",
+                    style="white",
+                )
+
+    error_text.append("\nExample setup:\n", style="white")
+    error_text.append("export STRIX_LLM='openai/gpt-5'\n", style="dim white")
+
+    if "LLM_API_KEY" in missing_required_vars:
+        error_text.append("export LLM_API_KEY='your-api-key-here'\n", style="dim white")
+
+    if missing_optional_vars:
+        for var in missing_optional_vars:
+            if var == "LLM_API_KEY":
+                error_text.append(
+                    "export LLM_API_KEY='your-api-key-here'  # optional with local models\n",
+                    style="dim white",
+                )
+            elif var == "LLM_API_BASE":
+                error_text.append(
+                    "export LLM_API_BASE='http://localhost:11434'  "
+                    "# needed for local models only\n",
+                    style="dim white",
+                )
+            elif var == "PERPLEXITY_API_KEY":
+                error_text.append(
+                    "export PERPLEXITY_API_KEY='your-perplexity-key-here'\n", style="dim white"
+                )
+
+    panel = Panel(
+        error_text,
+        title="[bold red]🛡️  STRIX CONFIGURATION ERROR",
+        title_align="center",
+        border_style="red",
+        padding=(1, 2),
+    )
+
+    console.print("\n")
+    console.print(panel)
+    console.print()
+
+
+def render_docker_missing_error() -> None:
+    console = Console()
+    error_text = Text()
+    error_text.append("❌ ", style="bold red")
+    error_text.append("DOCKER NOT INSTALLED", style="bold red")
+    error_text.append("\n\n", style="white")
+    error_text.append("The 'docker' CLI was not found in your PATH.\n", style="white")
+    error_text.append(
+        "Please install Docker and ensure the 'docker' command is available.\n\n", style="white"
+    )
+
+    panel = Panel(
+        error_text,
+        title="[bold red]🛡️  STRIX STARTUP ERROR",
+        title_align="center",
+        border_style="red",
+        padding=(1, 2),
+    )
+    console.print("\n", panel, "\n")
+
+
+def render_llm_error(exc: LLMWarmupError) -> None:
+    console = Console()
+    error_text = Text()
+    error_text.append("❌ ", style="bold red")
+    error_text.append("LLM CONNECTION FAILED", style="bold red")
+    error_text.append("\n\n", style="white")
+    error_text.append("Could not establish connection to the language model.\n", style="white")
+    error_text.append("Please check your configuration and try again.\n", style="white")
+    if exc.details:
+        error_text.append(f"\nError: {exc.details}", style="dim white")
+
+    panel = Panel(
+        error_text,
+        title="[bold red]🛡️  STRIX STARTUP ERROR",
+        title_align="center",
+        border_style="red",
+        padding=(1, 2),
+    )
+
+    console.print("\n")
+    console.print(panel)
+    console.print()
+
+
+def render_docker_pull_error(exc: DockerImagePullError) -> None:
+    console = Console()
+    error_text = Text()
+    error_text.append("❌ ", style="bold red")
+    error_text.append("FAILED TO PULL IMAGE", style="bold red")
+    error_text.append("\n\n", style="white")
+    error_text.append(f"Could not download: {exc.image_name}\n", style="white")
+    if exc.details:
+        error_text.append(exc.details, style="dim red")
+
+    panel = Panel(
+        error_text,
+        title="[bold red]🛡️  DOCKER PULL ERROR",
+        title_align="center",
+        border_style="red",
+        padding=(1, 2),
+    )
+    console.print(panel, "\n")
+
+
 def main() -> None:
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     args = parse_arguments()
 
-    check_docker_installed()
-    pull_docker_image()
+    try:
+        check_docker_installed()
+    except DockerUnavailableError:
+        render_docker_missing_error()
+        sys.exit(1)
 
-    validate_environment()
-    asyncio.run(warm_up_llm())
+    try:
+        pull_docker_image()
+    except DockerImagePullError as exc:
+        render_docker_pull_error(exc)
+        sys.exit(1)
+
+    try:
+        validate_environment()
+    except EnvironmentValidationError as exc:
+        render_environment_error(exc)
+        sys.exit(1)
+
+    try:
+        asyncio.run(warm_up_llm())
+    except LLMWarmupError as exc:
+        render_llm_error(exc)
+        sys.exit(1)
 
     if not args.run_name:
         args.run_name = generate_run_name()
